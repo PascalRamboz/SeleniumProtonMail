@@ -116,11 +116,12 @@ and understanding.
 
 BONUS TASK 1 
 The solution developed is available on GitHub onto public repository. 
+https://github.com/PascalRamboz/SeleniumProtonMail.git
 
 ---------------------------------------------------------------------------------------------------------------
 
 BONUS TASK 2 
-A Continuous Integration pipeline has been setup, it works well. 
+Continuous Integration pipeline.
 
 ---------------------------------------------------------------------------------------------------------------
 
