@@ -29,18 +29,11 @@ public class Stickers extends SeleniumParentClass {
 
 		try {
 
-			long startDate = Long.parseLong( getDateNow() );
-			System.out.println("Start date: " + startDate);
-			
 			stick.setUp();
 			stick.scenario();
 			stick.tearDown();
 			
-			long endDate = Long.parseLong( getDateNow() );
-			System.out.println("End date: " + endDate);
 			
-			System.out.println("Duraton: " + (endDate - startDate));
-
 		} catch(Throwable e) {
 
 			e.printStackTrace();
@@ -59,6 +52,7 @@ public class Stickers extends SeleniumParentClass {
 	public void scenario() throws Exception, InterruptedException {
 
 		try {
+
 
 			System.out.println("[ INFO ] Executing Stickers.scenario()");
 
@@ -95,9 +89,6 @@ public class Stickers extends SeleniumParentClass {
 			// select and delete all emails
 			trashEmailsOfCurrentFolder();
 
-			String textOfInbox = waitUntilElementToBeClickableAndGetText( "(//h3[@*='inbox'])[1]" );
-			Assert.assertEquals( "Your inbox is empty", textOfInbox );
-
 			// ---------------------------------------------------------------
 			// DELETE ALL STICKERS (i.e. ALL FOLDERS AND ALL LABELS)
 			deleteAllStickers();
@@ -107,8 +98,6 @@ public class Stickers extends SeleniumParentClass {
 			// ---------------------------------------------------------------
 			// FOLDERS SECTION		
 			createAllStickersForAGivenType("folder", FOLDER_QTY+1, FOLDER_PATTERN);
-
-			WebDriver.get( PROTONMAIL_URL_INBOX );
 			
 			forEachStickerForEachEmailComposeSendAndAssignASingleStickerToIt(
 					"folder", 
@@ -155,6 +144,10 @@ public class Stickers extends SeleniumParentClass {
 			Assert.assertEquals( textOfSubmitButton, textOfLoginButton );
 			// ---------------------------------------------------------------
 			
+			long endDate = Long.parseLong( getDateNow() );
+			System.out.println("End date: " + endDate);
+			
+			System.out.println("Duraton: " + (endDate - startDate));
 			
 		} catch(Throwable e) {
 
@@ -206,6 +199,8 @@ public class Stickers extends SeleniumParentClass {
 		String emailSubject = "";
 		String emailMessage= "";
 
+		WebDriver.get( PROTONMAIL_URL_INBOX );
+		
 		// foreach label
 		for (int iter_l=1; iter_l<=stickerQty; iter_l++) {
 
@@ -244,6 +239,8 @@ public class Stickers extends SeleniumParentClass {
 		String emailSubject = "";
 		String emailMessage= "";
 
+		WebDriver.get( PROTONMAIL_URL_INBOX );
+		
 		// foreach label
 		for (int iter_r=1; iter_r<=stickerQty; iter_r++) {
 
@@ -507,6 +504,8 @@ public class Stickers extends SeleniumParentClass {
 
 	public static void deleteAllStickers() throws InterruptedException {
 
+		WebDriver.get( PROTONMAIL_URL_INBOX );
+
 		waitUntilElementToBeClickableAndClick( "//*[text()='Folders / Labels']" );
 
 		// arriving on 'Folders and labels' page 
@@ -564,6 +563,8 @@ public class Stickers extends SeleniumParentClass {
 
 	public static void createAllStickersForAGivenType(String stickerType, int stickerQty, String stickerNamePattern) throws InterruptedException { 
 
+		WebDriver.get( PROTONMAIL_URL_INBOX );
+
 		waitUntilElementToBeClickableAndClick( "//a/*/*[contains(text(), 'Folders')]" );
 
 		int colorChoiceQty = 0;
@@ -619,6 +620,8 @@ public class Stickers extends SeleniumParentClass {
 			}
 
 		}
+		
+		WebDriver.get( PROTONMAIL_URL_INBOX );
 
 	}
 

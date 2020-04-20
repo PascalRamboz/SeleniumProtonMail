@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,12 +46,12 @@ public class SeleniumParentClass {
 	public static String PROTONMAIL_URL_LOGIN = PROTONMAIL_URL_COMMON + "/login";
 	public static String PROTONMAIL_URL_INBOX = PROTONMAIL_URL_COMMON + "/inbox";
 
+	public static int TIMEOUT_DURATION = 30;
 
 	public static WebDriver WebDriver;
-	
 
 	//private static String WatchedLog;
-	
+
 	public static void main(String[] args) throws Exception {
 
 		try {
@@ -228,6 +229,9 @@ public class SeleniumParentClass {
 
 		// move to trash
 		WebDriver.findElement(By.xpath("//button[@*='Move to trash']")).click();
+		
+		String textOfInbox = waitUntilElementToBeClickableAndGetText( "(//h3[@*='inbox'])[1]" );
+		Assert.assertEquals( "Your inbox is empty", textOfInbox );
 
 	}
 
