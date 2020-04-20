@@ -45,10 +45,10 @@ public class SeleniumParentClass {
 	public static String PROTONMAIL_URL_LOGIN = PROTONMAIL_URL_COMMON + "/login";
 	public static String PROTONMAIL_URL_INBOX = PROTONMAIL_URL_COMMON + "/inbox";
 
-	public static int TIMEOUT_DURATION = 30;
 
 	public static WebDriver WebDriver;
 	
+
 	//private static String WatchedLog;
 	
 	public static void main(String[] args) throws Exception {
@@ -56,29 +56,29 @@ public class SeleniumParentClass {
 		try {
 
 		} catch(Throwable e) {
-			
+
 			e.printStackTrace();
 			System.out.println(" === SeleniumParentClass.main() - call to takeScreenShot()");
 			String className = new Exception().getStackTrace()[0].getClassName();
 			takeScreenShot( className );
-			
+
 		}
 
 	}
-	
+
 	public static int generateRandomInt(int minNumber, int maxNumber) {
-		
+
 		Random r = new Random();
 		int randomInt = r.nextInt(maxNumber + 1 - minNumber);
 
 		return minNumber + randomInt;
-		
+
 	}
-	
+
 	@Before
 	public void setUp() {
-	// https://javacodehouse.com/blog/junit-tutorial/
-		
+		// https://javacodehouse.com/blog/junit-tutorial/
+
 		System.out.println( "[ INFO ] Executing " +  "Stickers.setUp()" );
 
 		if (DRIVER_SELECTED.contains("chrome")) {
@@ -134,8 +134,8 @@ public class SeleniumParentClass {
 		webElement = WebDriver.findElement(By.xpath( xpath ));
 		actions = new Actions(WebDriver);
 		actions.moveToElement(webElement).click().build().perform();
-		//actions.moveToElement(webElement).click().build().perform();
-		//actions.moveToElement(webElement).click().build().perform();
+		actions.moveToElement(webElement).click().build().perform();
+		actions.moveToElement(webElement).click().build().perform();
 
 	}
 
@@ -145,11 +145,12 @@ public class SeleniumParentClass {
 		Actions actions = null;
 
 		webElement = WebDriver.findElements(By.xpath( xpath )).get( idx );
+		
 		actions = new Actions(WebDriver);
 		actions.moveToElement(webElement).click().build().perform();
-		//actions.moveToElement(webElement).click().build().perform();
-		//actions.moveToElement(webElement).click().build().perform();
-
+		actions.moveToElement(webElement).click().build().perform();
+		actions.moveToElement(webElement).click().build().perform();
+		
 	}
 
 	public static WebElement findElementsByXpathAndGetOneByIndex(String xpath, int idx) {
@@ -169,11 +170,11 @@ public class SeleniumParentClass {
 	public static String findElementsByXpathGetOneByIndexAndGetText(String xpath, int idx) {
 
 		String text = WebDriver.findElements(By.xpath( xpath )).get( idx ).getText();
-		
+
 		return text;
 
 	}
-	
+
 	public static int findElementsByXpathAndGetSize(String xpath) {
 
 		int size = WebDriver.findElements(By.xpath( xpath )).size();
@@ -192,9 +193,7 @@ public class SeleniumParentClass {
 
 	public static void selectAllInboxEmails() throws InterruptedException {
 
-		// other path 1 : "//button/*[text()='Select options']"
-		// other path 2 : "//button/*[text()='Select All']"
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		actionsMoveToWebElementClickBuildPerform("//*[contains(@*, 'checkbox')]", 1);
 
 	}
@@ -206,7 +205,7 @@ public class SeleniumParentClass {
 		System.err.println("\n\n");
 		System.err.println("[ ERROR ] Taking a screenshot of last page where failure occurred !");
 		System.err.println("[ ERROR ] fileName=" + fileName);
-		
+
 		byte[] bytes=((TakesScreenshot) WebDriver).getScreenshotAs(OutputType.BYTES);
 
 		try (FileOutputStream fos = new FileOutputStream(fileName)) {
@@ -243,11 +242,38 @@ public class SeleniumParentClass {
 
 	}
 
+	public static WebElement waitUntilElementToBeClickable( String xpath, int idx ) {
+
+		WebDriverWait wait = new WebDriverWait(WebDriver, TIMEOUT_DURATION);
+		WebElement webElement = null;
+
+		webElement = wait.until(
+				ExpectedConditions.elementToBeClickable( 
+						findElementsByXpathAndGetOneByIndex( xpath, idx ) 
+						)
+				);
+
+		return webElement;
+
+	}
+
 	public static void waitUntilElementToBeClickableAndClick( String xpath ) {
 
 		WebDriverWait wait = new WebDriverWait(WebDriver, TIMEOUT_DURATION);
 
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath( xpath ))).click();
+
+	}
+
+	public static void waitUntilElementToBeClickableAndClick( String xpath, int idx ) {
+
+		WebDriverWait wait = new WebDriverWait(WebDriver, TIMEOUT_DURATION);
+
+		wait.until(
+				ExpectedConditions.elementToBeClickable(
+						findElementsByXpathAndGetOneByIndex( xpath, idx )
+						)
+				).click();
 
 	}
 
@@ -262,6 +288,20 @@ public class SeleniumParentClass {
 
 	}
 
+	public static String waitUntilElementToBeClickableAndGetText( String xpath, int idx ) {
+
+		WebDriverWait wait = new WebDriverWait(WebDriver, TIMEOUT_DURATION);
+		String text = "";
+
+		text = wait.until(
+				ExpectedConditions.elementToBeClickable(
+						findElementsByXpathAndGetOneByIndex( xpath, idx )
+						)
+				).getText();
+
+		return text;
+
+	}
 
 	// htps://www.edgewordstraining.co.uk/2018/12/18/junit-test-status-testwatcher/
 	// https://stackoverflow.com/questions/18008241/run-a-testwatcher-before-the-after

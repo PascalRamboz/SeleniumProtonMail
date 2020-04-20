@@ -10,11 +10,11 @@ import org.openqa.selenium.Keys;
 public class Stickers extends SeleniumParentClass {
 
 	// FOLDER_QTY (MAX on the 14th of April 2020) = 3 
-	public static int FOLDER_QTY = 4;
-	public static int EMAIL_QTY_PER_FOLDER = 2;
+	public static int FOLDER_QTY = 3;
+	public static int EMAIL_QTY_PER_FOLDER = 3;
 
 	// LABEL_QTY (MAX on the 14th of April 2020) = 20 
-	public static int LABEL_QTY = 21;
+	public static int LABEL_QTY = 20;
 	public static int EMAIL_QTY_PER_LABEL = 3;
 
 	public static String FOLDER_PATTERN = "Folder_";
@@ -29,9 +29,17 @@ public class Stickers extends SeleniumParentClass {
 
 		try {
 
+			long startDate = Long.parseLong( getDateNow() );
+			System.out.println("Start date: " + startDate);
+			
 			stick.setUp();
 			stick.scenario();
 			stick.tearDown();
+			
+			long endDate = Long.parseLong( getDateNow() );
+			System.out.println("End date: " + endDate);
+			
+			System.out.println("Duraton: " + (endDate - startDate));
 
 		} catch(Throwable e) {
 
@@ -58,8 +66,6 @@ public class Stickers extends SeleniumParentClass {
 			// https://www.guru99.com/first-webdriver-script.html
 			// https://beta.protonmail.com/login
 
-			//findElementsByXpathGetOneByIndexAndClick( "//button[text()='Add folder", 0 );
-
 			// ---------------------------------------------------------------
 			// LOG IN SECTION 
 			
@@ -80,8 +86,8 @@ public class Stickers extends SeleniumParentClass {
 
 			// wait and click on close inner prompt window 
 			waitUntilElementToBeClickableAndClick( "//button[@title='Close']" );
-
-			String textOfWelcomePage = findElementsByXpathGetOneByIndexAndGetText( "//h1[@*='Title']", 0 );
+			
+			String textOfWelcomePage = waitUntilElementToBeClickableAndGetText( "//h1[@*='Title']", 0 );
 			Assert.assertEquals( "Welcome, " + USERNAME + "!", textOfWelcomePage );
 
 			// ---------------------------------------------------------------
@@ -89,19 +95,21 @@ public class Stickers extends SeleniumParentClass {
 			// select and delete all emails
 			trashEmailsOfCurrentFolder();
 
-			String textOfInbox = findElementsByXpathGetOneByIndexAndGetText( "//h3[@*='inbox']", 0 );
+			String textOfInbox = waitUntilElementToBeClickableAndGetText( "(//h3[@*='inbox'])[1]" );
 			Assert.assertEquals( "Your inbox is empty", textOfInbox );
 
 			// ---------------------------------------------------------------
 			// DELETE ALL STICKERS (i.e. ALL FOLDERS AND ALL LABELS)
 			deleteAllStickers();
-			Thread.sleep(2000);
+			Thread.sleep(3000);
 			// ---------------------------------------------------------------
 
 			// ---------------------------------------------------------------
 			// FOLDERS SECTION		
-			createAllStickersForAGivenType("folder", FOLDER_QTY, FOLDER_PATTERN);
+			createAllStickersForAGivenType("folder", FOLDER_QTY+1, FOLDER_PATTERN);
 
+			WebDriver.get( PROTONMAIL_URL_INBOX );
+			
 			forEachStickerForEachEmailComposeSendAndAssignASingleStickerToIt(
 					"folder", 
 					FOLDER_PATTERN, 
@@ -113,7 +121,7 @@ public class Stickers extends SeleniumParentClass {
 
 			// ---------------------------------------------------------------
 			// LABELS SECTION 
-			createAllStickersForAGivenType("label", LABEL_QTY, LABEL_PATTERN);
+			createAllStickersForAGivenType("label", LABEL_QTY+1, LABEL_PATTERN);
 
 			forEachStickerForEachEmailComposeSendAndAssignASingleStickerToIt(
 					"label", 
@@ -146,8 +154,8 @@ public class Stickers extends SeleniumParentClass {
 			textOfLoginButton = findElementsByXpathGetOneByIndexAndGetText( "//button[@id='login_btn']", 0 );
 			Assert.assertEquals( textOfSubmitButton, textOfLoginButton );
 			// ---------------------------------------------------------------
-
-
+			
+			
 		} catch(Throwable e) {
 
 			e.printStackTrace();
@@ -200,9 +208,6 @@ public class Stickers extends SeleniumParentClass {
 
 		// foreach label
 		for (int iter_l=1; iter_l<=stickerQty; iter_l++) {
-
-			// go to inbox 
-			WebDriver.get(PROTONMAIL_URL_INBOX);
 
 			stickerName = stickerPattern + iter_l;
 
@@ -374,16 +379,15 @@ public class Stickers extends SeleniumParentClass {
 		System.out.println( "emailMessage=" + emailMessage );
 
 		// go to inbox to erase all pre-registered options ! 
-		//driver.get(PROTONMAIL_URL_INBOX);
+		WebDriver.get(PROTONMAIL_URL_INBOX);
 
 		// wait and click on Compose to write a message 
 		waitUntilElementToBeClickableAndClick( "//*[text()='Compose']" );
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 
 		// wait Send button to appear prior to filling email fields 
 		waitUntilElementToBeClickable( "//button[text()='Send']" );
-		Thread.sleep( 1000 );
-
+		
 		// fill email fields one by one 
 		WebDriver.switchTo().activeElement().sendKeys( emailRecipient + Keys.TAB + Keys.TAB ); 
 		Thread.sleep( 500 );
@@ -392,13 +396,11 @@ public class Stickers extends SeleniumParentClass {
 		WebDriver.switchTo().activeElement().sendKeys( Keys.TAB + emailMessage );
 
 		waitUntilElementToBeClickableAndClick( "//button[text()='Send']" );
+		Thread.sleep( 1500 );
 
-		// old xpath : //*[@role='alert']
-		String textAlert = waitUntilElementToBeClickableAndGetText( "(//*[text()='Message sent'])[1]" );
-		//Thread.sleep( 1000 );
+		String textAlert = waitUntilElementToBeClickableAndGetText( "//*[text()='Message sent']", 0 );
 		Assert.assertEquals( "Message sent", textAlert );
-		Thread.sleep( 3000 );
-
+		
 	}
 
 	public static void selectAndDeselectAllEmailsInbox() throws InterruptedException {
@@ -415,12 +417,9 @@ public class Stickers extends SeleniumParentClass {
 
 	public static void clickOnCheckboxOfLastReceivedEmailInbox() {
 
-		// wait until last created message is clickable into the mailbox 
-		// old path : "(//*[text()='" + patternToIdentifyEmail + "'])[1]
-		waitUntilElementToBeClickable( "(//*[contains(@*, 'selectBoxElement')])[2]" );
-		// click on last email 
-		findElementsByXpathGetOneByIndexAndClick( "(//*[contains(@*, 'selectBoxElement')])[2]", 0 );
-
+		// wait until last created message is clickable into the mailbox and click it 
+		waitUntilElementToBeClickableAndClick( "//*[contains(@*, 'selectBoxElement')]", 1 );
+		
 	}
 
 	public static void assignAStickerToSelectedEmail(String stickerType, String stickerName) throws InterruptedException {
@@ -433,20 +432,22 @@ public class Stickers extends SeleniumParentClass {
 			xpathOfDrodownMenu = "//button[@*='Label as']";
 		}
 		WebDriver.findElement(By.xpath(xpathOfDrodownMenu)).click();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 
 		// wait until sticker name is clickable into the dropdown folder menu 
-		waitUntilElementToBeClickable( "(//*[text()='" + stickerName + "'])[2]" );
-
-		actionsMoveToWebElementClickBuildPerform( "(//*[text()='" + stickerName + "'])[2]", 0 );
-
+		waitUntilElementToBeClickable( "//*[text()='" + stickerName + "']", 1 );
+		
+		//actionsMoveToWebElementClickBuildPerform( "(//*[text()='" + stickerName + "'])[2]", 0 );
+		actionsMoveToWebElementClickBuildPerform( "//*[text()='" + stickerName + "']", 1 );
+		
 		if (stickerType.equalsIgnoreCase("label")) {
 			findElementsByXpathGetOneByIndexAndClick( "//button[text()='Apply']", 0 );
 		}
-		Thread.sleep(2000);
+		
+		int alertMsgQty = findElementsByXpathAndGetSize( "//*[@role='alert']" );
+		String textAssignmentResult = waitUntilElementToBeClickableAndGetText( "//*[@role='alert']", alertMsgQty-1 );
+		System.out.println( "textAssignmentResult=" + textAssignmentResult );
 
-		// old xpath : "(//*[@role='alert'])[1]"
-		String textAssignmentResult = waitUntilElementToBeClickableAndGetText( "(//*[contains(@*,'notification-success')])[1]" );
 		if ( stickerType.equalsIgnoreCase("folder") == true ) {
 			Assert.assertEquals( "1 conversation moved to " + stickerName + ". Undo", textAssignmentResult  );
 		}
@@ -468,7 +469,7 @@ public class Stickers extends SeleniumParentClass {
 		}
 		WebDriver.findElement(By.xpath(xpathOfDrodownMenu)).click();
 
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 
 		String stickerName = "";
 		for (int iter_l=1; iter_l<=LABEL_QTY; iter_l++) {
@@ -482,9 +483,9 @@ public class Stickers extends SeleniumParentClass {
 				System.out.println("=> let's click on stickerName=" + stickerName + "\n");
 
 				// wait until sticker name is clickable into the dropdown folder menu 
-				waitUntilElementToBeClickable( "(//*[text()='" + stickerName + "'])[2]" );
-				actionsMoveToWebElementClickBuildPerform( "(//*[text()='" + stickerName + "'])[2]", 0 );
-
+				waitUntilElementToBeClickable( "//*[text()='" + stickerName + "']", 1 );
+				actionsMoveToWebElementClickBuildPerform( "//*[text()='" + stickerName + "']", 1 );
+				
 			}
 
 		}
@@ -494,7 +495,11 @@ public class Stickers extends SeleniumParentClass {
 			findElementsByXpathGetOneByIndexAndClick( "(//button[text()='Apply'])", 0 );
 		}
 		Thread.sleep(1000);
-		String textRoleAlert = waitUntilElementToBeClickableAndGetText( "(//*[@role='alert'])[1]" );
+
+		int alertMsgQty = findElementsByXpathAndGetSize( "//*[@role='alert']" );
+		String textRoleAlert = waitUntilElementToBeClickableAndGetText( "//*[@role='alert']", alertMsgQty-1 );
+		System.out.println( "textRoleAlert=" + textRoleAlert );
+
 		Assert.assertEquals( "Labels Saved", textRoleAlert );
 
 
@@ -524,31 +529,26 @@ public class Stickers extends SeleniumParentClass {
 				stickerCurrentName = findElementsByXpathGetOneByIndexAndGetText( "//*[contains(@*,'folders/labels')]", 0 ).split("\\s+")[0];
 
 				// click on the actions dropdown menu 
-				findElementsByXpathGetOneByIndexAndClick( "//button[@*='dropdown:open']", 0 );
-				Thread.sleep(1000);
-
+				//findElementsByXpathGetOneByIndexAndClick( "//button[@*='dropdown:open']", 0 );
+				waitUntilElementToBeClickableAndClick( "//button[@*='dropdown:open']", 0 );
+		
 				// click on the Delete option to select it 
-				waitUntilElementToBeClickable( "//button[text()='Delete'][1]" );
-				findElementsByXpathGetOneByIndexAndClick( "//button[text()='Delete']", 0);
-				Thread.sleep(1000);
-
-				// old xpath : "(//*[@id='modalTitle'])[1]"
+				waitUntilElementToBeClickableAndClick( "//button[text()='Delete']", 0);
+		
 				if ( stickerCurrentName.toLowerCase().contains("folder") == true ) {
 					stickerType = "folder";
 				}
 				if ( stickerCurrentName.toLowerCase().contains("label") == true ) {
 					stickerType = "label";
 				}
-				String textTitle = waitUntilElementToBeClickableAndGetText( "(//*[text()='Delete " + stickerType + "'])[1]" );
+				
+				String textTitle = waitUntilElementToBeClickableAndGetText( "//*[text()='Delete " + stickerType + "']", 0 );
 				Assert.assertEquals( "Delete " + stickerType, textTitle );
 
 				// click on Confirm button
-				waitUntilElementToBeClickable( "//button[text()='Confirm'][1]" );
-				findElementsByXpathGetOneByIndexAndClick( "//button[text()='Confirm']", 0 );
-				//Thread.sleep(1000);
-
-				// old xpath : "(//*[@role='alert'])[1]"
-				String textRoleAlert = waitUntilElementToBeClickableAndGetText( "(//*[text()='" + stickerCurrentName + " removed'])[1]" );
+				waitUntilElementToBeClickableAndClick( "//button[text()='Confirm']", 0 );
+				
+				String textRoleAlert = waitUntilElementToBeClickableAndGetText( "//*[@role='alert'][contains(text(), '" + stickerCurrentName + "')]" );
 				System.out.println( "textRoleAlert=" + textRoleAlert );
 				System.out.println( "stickerCurrentName=" + stickerCurrentName );
 				Assert.assertEquals( stickerCurrentName + " removed", textRoleAlert );
@@ -575,7 +575,7 @@ public class Stickers extends SeleniumParentClass {
 		for (int s=1; s<=stickerQty; s++) {
 
 			stickerNameToType = stickerNamePattern + s;
-			System.out.println( "stickerNameToType=" + stickerNameToType );
+			System.out.println( "\n\nstickerNameToType=" + stickerNameToType );
 
 			waitUntilElementToBeClickable( "//button[text()='Add " + stickerType + "']" );
 			System.out.println("//button[text()='Add " + stickerType + "']");
@@ -588,31 +588,31 @@ public class Stickers extends SeleniumParentClass {
 			chosenColour = generateRandomInt( 1, colorChoiceQty );
 			System.out.println("chosen color : " + chosenColour);
 			// click on the random chosen color 
-			findElementsByXpathAndGetOneByIndex( "//input[contains(@*, 'Color')]", chosenColour - 1 ).click();
-			findElementsByXpathAndGetOneByIndex( "//button[text()='Submit']", 0).click();
-			Thread.sleep(2000);
+			findElementsByXpathGetOneByIndexAndClick( "//input[contains(@*, 'Color')]", chosenColour - 1 );
+			findElementsByXpathGetOneByIndexAndClick( "//button[text()='Submit']", 0);
+			Thread.sleep(1000);
 
-			String notificationAlert = findElementsByXpathGetOneByIndexAndGetText( "//*[@role='alert']", 0 );
+			waitUntilElementToBeClickable( "//*[@role='alert']" );
+			int alertMsgQty = findElementsByXpathAndGetSize( "//*[@role='alert']" );
+			String notificationAlert = waitUntilElementToBeClickableAndGetText( "//*[@role='alert']", alertMsgQty-1 );
+			System.out.println( "notificationAlert=" + notificationAlert );
+			
 			String textRoleAlert = "";
 			if ( notificationAlert.contains( " created" ) ) {
 
-				// old xpath : "(//*[@role='alert'])[1]"
-				textRoleAlert = waitUntilElementToBeClickableAndGetText( "(//*[text()='" + stickerNameToType + " created'])[1]" );
+				textRoleAlert = waitUntilElementToBeClickableAndGetText( "//*[text()='" + stickerNameToType + " created']" );
 				System.out.println("textRoleAlert=" + textRoleAlert);
 				System.out.println("stickerNameToType=" + stickerNameToType);
 				Assert.assertEquals( stickerNameToType + " created", textRoleAlert );
-				Thread.sleep(1000);
 
-				// old xpath : "(//*[contains(@*,'folders/labels')])[" + s + "]"
-				lastStickerCreated = waitUntilElementToBeClickableAndGetText( "(//*[text()='" + stickerNameToType + "'])[1]" );
-				//findElementsByXpathGetOneByIndexAndGetText( "//*[text()='Label_1']", 0 ).split("\\s+")[0];
+				lastStickerCreated = waitUntilElementToBeClickableAndGetText( "//*[text()='" + stickerNameToType + "']", 0 );
 				System.out.println("lastStickerCreated=" + lastStickerCreated);
 				System.out.println("stickerNameToType=" + stickerNameToType);
 				Assert.assertEquals( stickerNameToType, lastStickerCreated );
 
 			} else {
 
-				textRoleAlert = waitUntilElementToBeClickableAndGetText( "(//*[contains(text(), ' limit reached')])[1]" );
+				textRoleAlert = waitUntilElementToBeClickableAndGetText( "//*[contains(text(), ' limit reached')]", 0 );
 				System.out.println("[ INFO ] " + stickerType + " limit reached !");
 				Assert.assertEquals( notificationAlert.contains( " limit reached" ) , true );
 
